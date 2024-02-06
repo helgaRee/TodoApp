@@ -16,7 +16,7 @@ public class UserService(UserRepository userRepository)
     //skapa metod för att skapa en kontakt, skicka med Dto
     //om kontakten inte finns, skapa kontakten. Om Kontakten finns, hämta kontakten och läs ut.
 
-    public async Task<UserEntity> CreateUserAsync(UserRegistrationDto userRegistrationDto)
+    public async Task<UserEntity> CreateUserAsync(UserDto userRegistrationDto)
     {
         try
         {
@@ -50,6 +50,7 @@ public class UserService(UserRepository userRepository)
         try
         {
             var result = await _userRepository.DeleteAsync(expression);
+            return result;
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return false;

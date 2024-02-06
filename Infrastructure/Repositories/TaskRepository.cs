@@ -8,17 +8,17 @@ namespace Infrastructure.Repositories;
 
 public class TaskRepository(DataContext context) : BaseRepository<TaskEntity>(context)
 {
-    private readonly DataContext _context = context;
+  //  private readonly DataContext _context = context;
 
     public override async Task<TaskEntity> GetAsync(Expression<Func<TaskEntity, bool>> expression)
     {
         try
         {
-            var existingEntity = await _context.Tasks
+            var existingEntity = await context.Tasks
                 .Include(i => i.Location)
                 .Include(i => i.Calendar)
-                .Include(i => i.User).ThenInclude(i => i.Tasks).ThenInclude(i => i.IsCompleted)
-                .Include (i => i.Category).ThenInclude(i => i.Tasks).ThenInclude(i => i.Deadline)
+                .Include(i => i.User)//.ThenInclude(i => i.Tasks).ThenInclude(i => i.IsCompleted)
+                .Include (i => i.Category)//.ThenInclude(i => i.Tasks).ThenInclude(i => i.Deadline)
                 .FirstOrDefaultAsync(expression);
 
             if (existingEntity != null)
@@ -36,11 +36,11 @@ public class TaskRepository(DataContext context) : BaseRepository<TaskEntity>(co
         try
         {
             //hitta entiteten
-            var existingEntities = await _context.Tasks
+            var existingEntities = await context.Tasks
                 .Include(i => i.Location)
                 .Include(i => i.Calendar)
-                .Include(i => i.User).ThenInclude(i => i.Tasks).ThenInclude(i => i.IsCompleted)
-                .Include(i => i.Category).ThenInclude(i => i.Tasks).ThenInclude(i => i.Deadline)
+                .Include(i => i.User)//.ThenInclude(i => i.Tasks).ThenInclude(i => i.IsCompleted)
+                .Include(i => i.Category)//.ThenInclude(i => i.Tasks).ThenInclude(i => i.Deadline)
                 .ToListAsync();
             //returnera om inte null
             if (existingEntities != null)

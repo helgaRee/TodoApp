@@ -14,6 +14,7 @@ var builder = Host.CreateDefaultBuilder().ConfigureServices(services =>
     services.AddSingleton<TaskRepository>();
     services.AddSingleton<UserRepository>();
     services.AddSingleton<TaskService>();
+    services.AddSingleton<CalendarRepository>();
 
 }).Build();
 
@@ -28,9 +29,10 @@ var result = await taskService.CreateTaskAsync(new TaskDto
     Title = "A1 Title",
     Description = "a1 Description",
     IsCompleted = true,
+    // Konvertera Deadline från DateTimeOffset till DateTime
+    Deadline = DateTimeOffset.UtcNow.DateTime,
     Status = "A1 ongoing",
     CategoryName = "Category-Test",
-
 });
 
 if (result)

@@ -2,102 +2,157 @@
 using Infrastructure.Entities;
 using Infrastructure.Repositories;
 using System.Diagnostics;
+using System.Net.Http.Headers;
 
 namespace Infrastructure.Services;
 //Service som hanterar TASK, CALENDAR och LOCATION
-public class TaskService(CategoryRepository categoryRepository, TaskRepository taskRepository)
+public class TaskService(CategoryRepository categoryRepository, TaskRepository taskRepository, CategoryService categoryService)
 {
     //hämta min taskRepo
     private readonly CategoryRepository _categoryRepository = categoryRepository;
     private readonly TaskRepository _taskRepository = taskRepository;
+    private readonly CategoryService _categoryService = categoryService;
 
 
-    // Metod för att skapa en ny uppgift genom att tillhandahålla information om Titel, beskrivning, deadline.
-    //tar emot en instans av TaskDto
-    public async Task<bool> CreateTaskAsync(TaskDto taskDto)
+/// <summary>
+/// Creates a new Category if it doesnt already exist. Then creates a new Task.
+/// </summary>
+/// <param name="taskDto"></param>
+/// <returns>Returns a new TaskEntity with a category, or null if nothing was created.</returns>
+    public async Task<TaskEntity> CreateTaskAsync(TaskCreateDto taskDto)
     {
         try
         {
-            //Hämtar en kategori.
-            var categoryEntity = _categoryRepository.GetAsync(x => x.CategoryName == taskDto.CategoryName);
-            //Om kategorin är null, skapa ny categorin.
-            if (categoryEntity == null)
+            var categoryEntity = await _categoryRepository.GetAsync(x => x.CategoryName == taskDto.CategoryName);
+            categoryEntity ??= await _categoryRepository.CreateAsync(new CategoryEntity { CategoryName = taskDto.CategoryName });
+
+            if (categoryEntity != null)
             {
-                categoryEntity = _categoryRepository.CreateAsync(new CategoryEntity { CategoryName = taskDto.CategoryName });   
+                var taskEntity = await _taskRepository.CreateAsync(new TaskEntity
+                {
+                    Title = taskDto.Title,
+                    Description = taskDto.Description,
+                    Deadline = taskDto.Deadline,
+                    Status = taskDto.Status,
+                    CategoryId = categoryEntity.CategoryId,
+                });
+                return taskEntity;
             }
-            //Skapa en Task
-            var taskEntity = new TaskEntity
-            {
-                Title = taskDto.Title,
-                Description = taskDto.Description,
-                IsCompleted = taskDto.IsCompleted,
-                Deadline = taskDto.Deadline,
-                Status = taskDto.Status,
-                CategoryId = categoryEntity.Id,
-            };
-            //Spara
-           var result = await _taskRepository.CreateAsync(taskEntity);
-           if (result != null)
-            {
-                return true;
-            }
-            
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
-        return false;
-
+        return null!;
     }
 
+    /// <summary>
+    /// Gets a task from the database
+    /// </summary>
+    /// <param name="title"></param>
+    /// <returns>An existing task from the database, or null if the database is empty</returns>
     public async Task<TaskEntity> GetTask(string title)
     {
         try
         {
-            var result = await _taskRepository.GetAsync(x => x.Title == title);
-            return result;
+            var taskEntity = await _taskRepository.GetAsync(x => x.Title == title);
+            return taskEntity;
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         return null!;
     }
 
 
-    //GET TASKS
-    public async Task<IEnumerable<TaskDto>> GetTasks()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name=""></param>
+    /// <returns>Returns a list of existing tasks or an empty list.</returns>
+    public async Task<IEnumerable<TaskEntity>> GetTasks()
     {
-        var tasks = new List<TaskDto>();
-
+        //var tasks = new List<TaskCreateDto>();
         try
         {
-            var result = await _taskRepository.GetAllAsync(); //får tillbaka en taskentity
-            //omvandla till en lista
-            if (result != null)
-            {
-                foreach (var item in result)
-                {
-                    tasks.Add(new TaskDto
-                    {
-                        Title = item.Title,
-                        Description = item.Description,
-                        IsCompleted = item.IsCompleted,
-                        Deadline = item.Deadline,
-                        Status = item.Status,
-                        CategoryName = item.Category.CategoryName
-                    });
-                    return tasks;
-                }
-            }
+           var tasks = await _taskRepository.GetAllAsync();
+            return tasks;         
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
-        return null!;
+            return Enumerable.Empty<TaskEntity>();    
+    }
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    public async Task<bool> UpdateTask(TaskUpdateDto dto)
+    {
+
+        //SKAPA EN TASK - UPPDATERA EN TASK
+        var taskEntity = new TaskEntity
+        {
+            TaskId = dto.TaskId,
+            Title = dto.Title,
+            Description = dto.Description,
+            IsCompleted = dto.IsCompleted,
+            Deadline = dto.Deadline,
+            Status = dto.Status,
+        };
+
+        //Skapa en ny instans av TaskEntity och stoppa in värdena från Taskentit´teten som hämtas från Dto.
+        //Den nya Tasken ska uppdateras med värden från Dto. "skapar en kopia av entiteten och tjoffar in värden"
+
+            //Asynkront anrop till metoden UpdateAsync.  Den tar 2 parametrar, ett lambdauttryck för att filtrera vilken kategori som ska uppdateras
+            //baserat på CategoryId, samt den nya kategorin som ska uppdateras
+            var updatedTask = await _taskRepository.UpdateAsync(x => x.Title == dto.Title, taskEntity);
+
+            //OM task inte är null, skapa en ny TaskDto med de uppdaterade värdena. 
+            if (updatedTask != null)
+            {
+                var taskDto = new TaskUpdateDto(
+                    updatedTask.TaskId,
+                    updatedTask.Title,
+                    updatedTask.Description!,
+                    updatedTask.IsCompleted,
+                    updatedTask.Deadline,
+                    updatedTask.Status!
+                );
+                return taskDto != null;
+            }
+            return false;
+    }
+
+
+  /// <summary>
+  /// Deletes an existing task by Id.
+  /// </summary>
+  /// <param name="id"></param>
+  /// <returns>Returns true if deletion was succesful, else false.</returns>
+    public async Task<bool> DeleteTask(int id)
+    {
+        //hämta
+        var deletedTask = await _taskRepository.DeleteAsync(x => x.TaskId == id);
+        return true;
+        
+    }
+
+    public async Task<bool> IsComplete(int id)
+    {
+        //hämta
+        var completedTask = await _taskRepository.GetAsync(x => x.TaskId == id);
+        if(completedTask != null)
+        {
+            //ska kunna bocka av denna att den nu är färdig.
+        }
+        return true;
+
     }
 
 
 
 
-   // public async Task<TaskDto> UpdateTask(UpdatedTaskDto updatedTaskDto)
-  //  {
-      //  var updatedTask = await _taskRepository.UpdateAsync();
-       // return updatedTask;
-   // }
+
+
+}
 
 
 
@@ -105,18 +160,15 @@ public class TaskService(CategoryRepository categoryRepository, TaskRepository t
 
 
 
-    //Metod för att hämta en uppgift
 
 
-
-    //Metod för att ta bort en uppgift
 
 
     //metod för att markera en uppgift som slutförd
 
 
-    //hämta en lista med alla uppgifter
 
 
-    
-}
+
+
+

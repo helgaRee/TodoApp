@@ -16,8 +16,6 @@ public class UserRepository(DataContext context) : BaseRepository<UserEntity>(co
         {
             var existingEntity = await _context.Users
                 .Include(i => i.Tasks)
-                .Include(i => i.UserName)
-                .Include(i => i.Email)
                 .FirstOrDefaultAsync(expression);
             if (existingEntity != null)
             {
@@ -36,8 +34,6 @@ public class UserRepository(DataContext context) : BaseRepository<UserEntity>(co
             //hitta entiteten
             var existingEntities = await _context.Users
                 .Include(i => i.Tasks)
-                .Include(i => i.UserName)
-                .Include(i => i.Email)
                 .ToListAsync();
             //returnera om inte null
             if (existingEntities != null)

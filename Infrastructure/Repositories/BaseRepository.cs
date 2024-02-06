@@ -52,16 +52,12 @@ public abstract class BaseRepository<TEntity> where TEntity : class
     {
         try
         {
-            //hitta entiteten
+            //Hämta entiteterna från databasen
             var existingEntities = await _context.Set<TEntity>().ToListAsync();
-            //returnera om inte null
-            if (existingEntities != null)
-            {
                 return existingEntities;
-            }
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
-        return null!;
+            return null!;
     }
 
     //UPDATE

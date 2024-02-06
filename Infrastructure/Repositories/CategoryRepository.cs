@@ -8,7 +8,7 @@ namespace Infrastructure.Repositories;
 
 public class CategoryRepository(DataContext context) : BaseRepository<CategoryEntity>(context)
 {
-    private readonly DataContext _context = context;
+   // private readonly DataContext _context = context;
 
     
     
@@ -16,7 +16,7 @@ public class CategoryRepository(DataContext context) : BaseRepository<CategoryEn
     {
         try
         {
-            var existingEntity = await _context.Categories
+            var existingEntity = await context.Categories
                 .Include(i => i.Tasks)
                 .FirstOrDefaultAsync(expression);
 
@@ -35,7 +35,7 @@ public class CategoryRepository(DataContext context) : BaseRepository<CategoryEn
         try
         {
             //hitta entiteten
-            var existingEntities = await _context.Categories
+            var existingEntities = await context.Categories
                 .Include(i => i.Tasks)
                 .ToListAsync();
             //returnera om inte null

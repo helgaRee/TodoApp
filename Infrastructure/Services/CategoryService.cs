@@ -82,20 +82,23 @@ public class CategoryService(CategoryRepository categoryRepository)
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="updatedCategoryDto"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
-    public async Task<CategoryDto> UpdateCategoryAsync(UpdatedCategoryDto updatedCategoryDto)
+    public async Task<CategoryDto> UpdateCategoryAsync(CategoryDto dto)
     {
         try
         {
             //Skapar en ny instans av CategoryEntity och stoppar in CategoryId och CategoryName som hämtas från updatedCAtegoryDto.
             //Den nya Categorin ska uppdateras med värden från updatedCategoryDto. "skapar en kopia av entiteten och tjoffar in värden"
-            var categoryEntity = new CategoryEntity { CategoryId = updatedCategoryDto.Id, CategoryName = updatedCategoryDto.CategoryName };
-            
-            
+            var categoryEntity = new CategoryEntity 
+            { 
+                CategoryId = dto.Id, 
+                CategoryName = dto.CategoryName 
+            };
+                      
             //Asynkront anrop till metoden UpdateAsync.  Den tar 2 parametrar, ett lambdauttryck för att filtrera vilken kategori som ska uppdateras
             //baserat på CategoryId, samt den nya kategorin som ska uppdateras
-            var updatedCategoryEntity = await _categoryRepository.UpdateAsync(x => x.CategoryId == updatedCategoryDto.Id, categoryEntity);
+            var updatedCategoryEntity = await _categoryRepository.UpdateAsync(x => x.CategoryId == dto.Id, categoryEntity);
 
             if(updatedCategoryEntity != null)
             {
@@ -120,7 +123,7 @@ public class CategoryService(CategoryRepository categoryRepository)
         try
         {
             var result = await _categoryRepository.DeleteAsync(expression);                     
-            return true;           
+            return result;           
         }
         catch (Exception ex) { Debug.WriteLine("ERROR :: " + (ex.Message)); }
         return false;
