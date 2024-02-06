@@ -21,21 +21,28 @@ var builder = Host.CreateDefaultBuilder().ConfigureServices(services =>
 builder.Start();
 
 Console.ReadKey();
-
 Console.Clear();
+
 var taskService = builder.Services.GetRequiredService<TaskService>();
-var result = await taskService.CreateTaskAsync(new TaskDto
+var taskDto = new TaskCreateDto
 {
     Title = "A1 Title",
     Description = "a1 Description",
-    IsCompleted = true,
-    // Konvertera Deadline från DateTimeOffset till DateTime
-    Deadline = DateTimeOffset.UtcNow.DateTime,
+    Deadline = DateTime.Now,
     Status = "A1 ongoing",
     CategoryName = "Category-Test",
-});
+};
 
-if (result)
-    Console.WriteLine("Lyckades!");
-else Console.WriteLine("Något gick fel..");
+var taskEntity = await taskService.CreateTaskAsync(taskDto); // Skapar en ny uppgift
+
+if (taskEntity != null)
+{
+    var categoryId = taskEntity.CategoryId; // Hämtar kategorins ID från den nya uppgiften
+    // Använd categoryId på något sätt...
+}
+else
+{
+    Console.WriteLine("Something went wrong creating the task.");
+}
+
 Console.ReadKey();
