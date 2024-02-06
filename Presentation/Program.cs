@@ -10,11 +10,11 @@ var builder = Host.CreateDefaultBuilder().ConfigureServices(services =>
 {
     services.AddDbContext<DataContext>(x => x.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\EC\SQL\TodoApp\Infrastructure\Data\local_database.mdf;Integrated Security=True;Connect Timeout=30"));
 
-    services.AddSingleton<CategoryRepository>();
-    services.AddSingleton<TaskRepository>();
-    services.AddSingleton<UserRepository>();
-    services.AddSingleton<TaskService>();
-    services.AddSingleton<CalendarRepository>();
+    services.AddScoped<CategoryRepository>();
+    services.AddScoped<TaskRepository>();
+    services.AddScoped<UserRepository>();
+    services.AddScoped<TaskService>();
+    services.AddScoped<CalendarRepository>();
 
 }).Build();
 
