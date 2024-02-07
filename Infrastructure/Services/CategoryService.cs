@@ -16,22 +16,24 @@ public class CategoryService(CategoryRepository categoryRepository)
     /// Method that creates a category if it doesnt exist
     /// </summary>
     /// <param name="categoryName"></param>
-    /// <returns>Returns a new Category if it doesnt exist, else return false.</returns>
-    public async Task<bool> CreateCategoryAsync(string categoryName)
+    /// <returns>Returns a new Category if it doesnt exist, else return null.</returns>
+    public async Task<CategoryDto> CreateCategoryAsync(string categoryName)
     {
         try
         {
-            if (!await _categoryRepository.ExistingAsync(x => x.CategoryName == categoryName))
+           var categoryExists = await _categoryRepository.ExistingAsync(x => x.CategoryName == categoryName);   
+            if (!categoryExists)
             {
-                var categoryEntity = await _categoryRepository.CreateAsync(new CategoryEntity { CategoryName = categoryName });
-                if (categoryEntity != null)
+                var result = await _categoryRepository.CreateAsync(new CategoryEntity { CategoryName = categoryName });
+                if (result != null)
                 {
-                    return true;
+                    var newCategory = new CategoryDto(result.CategoryId, result.CategoryName);
+                    return newCategory;
                 }
-            }
+            }                 
         }
         catch (Exception ex) { Debug.WriteLine("ERROR :: " + ex.Message); }
-        return false;
+        return null!;
     }
 
 
@@ -60,7 +62,7 @@ public class CategoryService(CategoryRepository categoryRepository)
 /// Gets all categories
 /// </summary>
 /// <returns>Returns a list of all categories</returns>
-    public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
+    public async Task<IEnumerable<CategoryDto>> GetCategoriesAsync()
     {
         try
         {
@@ -92,13 +94,13 @@ public class CategoryService(CategoryRepository categoryRepository)
             //Den nya Categorin ska uppdateras med värden från updatedCategoryDto. "skapar en kopia av entiteten och tjoffar in värden"
             var categoryEntity = new CategoryEntity 
             { 
-                CategoryId = dto.Id, 
+                CategoryId = dto.CategoryId, 
                 CategoryName = dto.CategoryName 
             };
                       
             //Asynkront anrop till metoden UpdateAsync.  Den tar 2 parametrar, ett lambdauttryck för att filtrera vilken kategori som ska uppdateras
             //baserat på CategoryId, samt den nya kategorin som ska uppdateras
-            var updatedCategoryEntity = await _categoryRepository.UpdateAsync(x => x.CategoryId == dto.Id, categoryEntity);
+            var updatedCategoryEntity = await _categoryRepository.UpdateAsync(x => x.CategoryId == dto.CategoryId, categoryEntity);
 
             if(updatedCategoryEntity != null)
             {

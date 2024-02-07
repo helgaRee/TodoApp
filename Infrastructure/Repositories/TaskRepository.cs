@@ -8,13 +8,13 @@ namespace Infrastructure.Repositories;
 
 public class TaskRepository(DataContext context) : BaseRepository<TaskEntity>(context)
 {
-  //  private readonly DataContext _context = context;
+    private readonly DataContext _context = context;
 
     public override async Task<TaskEntity> GetAsync(Expression<Func<TaskEntity, bool>> expression)
     {
         try
         {
-            var existingEntity = await context.Tasks
+            var existingEntity = await _context.Tasks
                 .Include(i => i.Location)
                 .Include(i => i.Calendar)
                 .Include(i => i.User)//.ThenInclude(i => i.Tasks).ThenInclude(i => i.IsCompleted)
@@ -36,7 +36,7 @@ public class TaskRepository(DataContext context) : BaseRepository<TaskEntity>(co
         try
         {
             //hitta entiteten
-            var existingEntities = await context.Tasks
+            var existingEntities = await _context.Tasks
                 .Include(i => i.Location)
                 .Include(i => i.Calendar)
                 .Include(i => i.User)//.ThenInclude(i => i.Tasks).ThenInclude(i => i.IsCompleted)

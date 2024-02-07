@@ -17,20 +17,20 @@ public class TaskEntity
     public string? Description { get; set; }
 
     [Column(TypeName = "bit")]
-    public bool IsCompleted { get; set; } = false;
+    public bool? IsCompleted { get; set; } = false;
 
     [Column(TypeName = "DateTime")]
-    public DateTime Deadline { get; set; }
+    public DateTime? Deadline { get; set; }
 
     [Column(TypeName = "nvarchar(20)")]
     public string? Status { get; set; }
 
 
-    public int LocationId { get; set; }
-    public virtual LocationEntity Location { get; set; } = null!;
+    public int? LocationId { get; set; }
+    public virtual LocationEntity? Location { get; set; } = null!;
 
-    public int CalendarId { get; set; }
-    public virtual CalendarEntity Calendar { get; set; } = null!;
+    public int? CalendarId { get; set; }
+    public virtual CalendarEntity? Calendar { get; set; } = null!;
 
 
     [Required]

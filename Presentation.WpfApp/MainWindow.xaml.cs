@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using Infrastructure.Dtos;
+using Infrastructure.Services;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -11,14 +13,17 @@ using System.Windows.Shapes;
 
 namespace Presentation.WpfApp
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+
+        private readonly TaskService _taskService;
+
+        public MainWindow(TaskService taskService)
         {
-            InitializeComponent();
+                InitializeComponent();
+                 _taskService = taskService;
+
         }
+
     }
 }

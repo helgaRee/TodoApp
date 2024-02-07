@@ -5,16 +5,21 @@ using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System;
 
 var builder = Host.CreateDefaultBuilder().ConfigureServices(services =>
 {
     services.AddDbContext<DataContext>(x => x.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\EC\SQL\TodoApp\Infrastructure\Data\local_database.mdf;Integrated Security=True;Connect Timeout=30"));
 
     services.AddScoped<CategoryRepository>();
+    services.AddScoped<CategoryService>();
     services.AddScoped<TaskRepository>();
-    services.AddScoped<UserRepository>();
     services.AddScoped<TaskService>();
+    services.AddScoped<UserRepository>();
+    services.AddScoped<UserService>();
     services.AddScoped<CalendarRepository>();
+    services.AddScoped<CalendarService>();
 
 }).Build();
 
@@ -23,26 +28,19 @@ builder.Start();
 Console.ReadKey();
 Console.Clear();
 
-var taskService = builder.Services.GetRequiredService<TaskService>();
-var taskDto = new TaskCreateDto
-{
-    Title = "A1 Title",
-    Description = "a1 Description",
-    Deadline = DateTime.Now,
-    Status = "A1 ongoing",
-    CategoryName = "Category-Test",
-};
+var userService = builder.Services.GetRequiredService<UserService>();
+var result = userService.CreateUserAsync(new UserDto
+        { 
+                UserName = "Helga",
+                Email = "helga@domain.com",
+                Password = "Testlösenord21321",
+        });
 
-var taskEntity = await taskService.CreateTaskAsync(taskDto); // Skapar en ny uppgift
-
-if (taskEntity != null)
-{
-    var categoryId = taskEntity.CategoryId; // Hämtar kategorins ID från den nya uppgiften
-    // Använd categoryId på något sätt...
-}
+if (result != null)
+    Console.WriteLine("lyckades");
 else
 {
-    Console.WriteLine("Something went wrong creating the task.");
+    Console.WriteLine("Något gick fel");
 }
 
 Console.ReadKey();

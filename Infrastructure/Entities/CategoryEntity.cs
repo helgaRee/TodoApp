@@ -15,7 +15,7 @@ public class CategoryEntity
 
 
     [Column(TypeName = "bit")]
-    public bool IsPrivate { get; set; } = false;
+    public bool? IsPrivate { get; set; } = false;
 
     public virtual ICollection<TaskEntity> Tasks { get; set; } = new HashSet<TaskEntity>();
 }

@@ -6,42 +6,108 @@ using System.Net.Http.Headers;
 
 namespace Infrastructure.Services;
 //Service som hanterar TASK, CALENDAR och LOCATION
-public class TaskService(CategoryRepository categoryRepository, TaskRepository taskRepository, CategoryService categoryService)
+public class TaskService(UserRepository userRepository, LocationRepository locationRepository, CategoryRepository categoryRepository, TaskRepository taskRepository, CalendarRepository calendarRepository)
 {
     //hämta min taskRepo
-    private readonly CategoryRepository _categoryRepository = categoryRepository;
     private readonly TaskRepository _taskRepository = taskRepository;
-    private readonly CategoryService _categoryService = categoryService;
+    private readonly CategoryRepository _categoryRepository = categoryRepository;
+    //private readonly CategoryService _categoryService = categoryService;
+    //private readonly CalendarService _calendarService = calendarService;
 
 
-/// <summary>
-/// Creates a new Category if it doesnt already exist. Then creates a new Task.
-/// </summary>
-/// <param name="taskDto"></param>
-/// <returns>Returns a new TaskEntity with a category, or null if nothing was created.</returns>
-    public async Task<TaskEntity> CreateTaskAsync(TaskCreateDto taskDto)
+    private readonly LocationRepository _locationRepository = locationRepository;
+    private readonly CalendarRepository _calendarRepository = calendarRepository;
+    private readonly UserRepository _userRepository = userRepository;
+
+    /// <summary>
+    /// Creates a new Category if it doesnt already exist. Then creates a new Task.
+    /// </summary>
+    /// <param name="taskDto"></param>
+    /// <returns>Returns a new TaskEntity with a category, or null if nothing was created.</returns>
+    public async Task<TaskDto> CreateTaskAsync(TaskCreateDto taskDto)
     {
         try
         {
-            var categoryEntity = await _categoryRepository.GetAsync(x => x.CategoryName == taskDto.CategoryName);
-            categoryEntity ??= await _categoryRepository.CreateAsync(new CategoryEntity { CategoryName = taskDto.CategoryName });
 
-            if (categoryEntity != null)
+            // Kontrollera om kategorin redan existerar i databasen - SÖKNING och HÄMTAR
+            var taskInDatabase = await _taskRepository.GetAsync(x => x.Title == taskDto.Title);
+
+            if (taskInDatabase == null)
             {
-                var taskEntity = await _taskRepository.CreateAsync(new TaskEntity
+                // Skapa Location
+                var locationEntity = await _locationRepository.CreateAsync(new LocationEntity
+                {
+                    LocationName = taskDto.LocationName,
+                    StreetName = taskDto.StreetName,
+                    PostalCode = taskDto.PostalCode,
+                    City = taskDto.City
+                });
+
+                // Skapa Calendar
+                var calendarEntity = await _calendarRepository.CreateAsync(new CalendarEntity
+                {
+                    Time = taskDto.Time,
+                    Date = taskDto.Date,
+                    Year = taskDto.Year
+                });
+
+                // Skapa User
+                var userEntity = await _userRepository.CreateAsync(new UserEntity
+                {
+                    UserName = taskDto.UserName,
+                    Email = taskDto.Email!,
+                    Password = taskDto.Password!
+                });
+
+                // Skapa Category
+                var categoryEntity = await _categoryRepository.CreateAsync(new CategoryEntity
+                {
+                    CategoryName = taskDto.CategoryName,
+                    IsPrivate = taskDto.IsPrivate
+                });
+
+                // Skapa TaskEntity och associera med Location, Calendar, User och Category
+                var taskEntity = new TaskEntity
                 {
                     Title = taskDto.Title,
                     Description = taskDto.Description,
                     Deadline = taskDto.Deadline,
                     Status = taskDto.Status,
-                    CategoryId = categoryEntity.CategoryId,
-                });
-                return taskEntity;
+                    LocationId = locationEntity.LocationId,
+                    CalendarId = calendarEntity.CalendarId,
+                    UserId = userEntity.UserId,
+                    CategoryId = categoryEntity.CategoryId
+                };
+
+                // Spara uppgiften i databasen
+                var createdTaskEntity = await _taskRepository.CreateAsync(taskEntity);
+
+                // Skapa och returnera DTO för den skapade uppgiften
+                var createdTaskDto = new TaskDto
+                {
+                    Title = createdTaskEntity.Title,
+                    Description = createdTaskEntity.Description,
+                    Deadline = createdTaskEntity.Deadline.Value,
+                    Status = createdTaskEntity.Status,
+                    // Fyll i med resten av egenskaperna om det behövs
+                };
+
+                return createdTaskDto;
+            }
+            else
+            {
+                // Om uppgiften redan finns i databasen, returnera null eller kasta ett undantag
+                return null!;
             }
         }
+
+
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
+        // Skapa den nya uppgiften och använd den befintliga eller nyss skapade kategorins ID
         return null!;
     }
+
+
 
     /// <summary>
     /// Gets a task from the database
@@ -112,11 +178,11 @@ public class TaskService(CategoryRepository categoryRepository, TaskRepository t
                     updatedTask.TaskId,
                     updatedTask.Title,
                     updatedTask.Description!,
-                    updatedTask.IsCompleted,
-                    updatedTask.Deadline,
+                    updatedTask.IsCompleted!.Value,
+                    updatedTask.Deadline!.Value,
                     updatedTask.Status!
                 );
-                return taskDto != null;
+            return true;
             }
             return false;
     }

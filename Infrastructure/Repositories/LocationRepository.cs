@@ -8,14 +8,14 @@ namespace Infrastructure.Repositories;
 
 public class LocationRepository(DataContext context) : BaseRepository<LocationEntity>(context)
 {
-   // private readonly DataContext _context = context;
+   private readonly DataContext _context = context;
 
 
     public override async Task<LocationEntity> GetAsync(Expression<Func<LocationEntity, bool>> expression)
     {
         try
         {
-            var existingEntity = await context.Locations
+            var existingEntity = await _context.Locations
                 .Include(i => i.Tasks)
                 .FirstOrDefaultAsync(expression);
 
@@ -34,7 +34,7 @@ public class LocationRepository(DataContext context) : BaseRepository<LocationEn
         try
         {
             //hitta entiteten
-            var existingEntities = await context.Locations
+            var existingEntities = await _context.Locations
                 .Include(i => i.Tasks)
                 .ToListAsync();
             //returnera om inte null

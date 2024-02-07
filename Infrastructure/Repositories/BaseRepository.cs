@@ -54,6 +54,7 @@ public abstract class BaseRepository<TEntity> where TEntity : class
         {
             //Hämta entiteterna från databasen
             var existingEntities = await _context.Set<TEntity>().ToListAsync();
+            await _context.SaveChangesAsync();
                 return existingEntities;
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
@@ -69,6 +70,7 @@ public abstract class BaseRepository<TEntity> where TEntity : class
             if (existingEntity != null)
             {
                 _context.Entry(existingEntity).CurrentValues.SetValues(updatedEntity);
+                await _context.SaveChangesAsync();
                 return existingEntity;
             }
         }

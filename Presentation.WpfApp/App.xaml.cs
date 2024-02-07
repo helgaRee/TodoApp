@@ -13,7 +13,6 @@ namespace Presentation.WpfApp
 
     public partial class App : Application
     {
-        private readonly DataContext _dataContext;
         private IHost builder;
 
         public App()
@@ -27,10 +26,18 @@ namespace Presentation.WpfApp
                 services.AddScoped<UserRepository>();
                 services.AddScoped<TaskService>();
                 services.AddScoped<CalendarRepository>();
+                //Sinlgeton för att den ska vara konstant igång hela tiden
+                services.AddSingleton<MainWindow>();
             }).Build();
         }
 
-       
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            builder.Start();
+
+            var mainWindow = builder.Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+        }
     }
 
 }

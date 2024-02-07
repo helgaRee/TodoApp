@@ -1,4 +1,4 @@
 ﻿namespace Infrastructure.Dtos;
 
-public record CategoryDto(int Id, string CategoryName);
+public record CategoryDto(int CategoryId, string CategoryName);
 

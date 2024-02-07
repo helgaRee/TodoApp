@@ -10,13 +10,13 @@ public class CalendarEntity
     public int CalendarId { get; set; }
 
     [Column(TypeName = "DateTime")]
-    public DateTime Time { get; set; }
+    public DateTime? Time { get; set; }
 
     [Column(TypeName = "DateTime")]
-    public DateTime Date { get; set; }
+    public DateTime? Date { get; set; }
 
     [Column(TypeName = "DateTime")]
-    public DateTime Year { get; set; }
+    public DateTime? Year { get; set; }
 
     public virtual ICollection<TaskEntity> Tasks { get; set; } = new HashSet<TaskEntity>();
 

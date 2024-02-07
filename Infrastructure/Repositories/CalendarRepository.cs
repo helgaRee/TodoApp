@@ -9,14 +9,14 @@ namespace Infrastructure.Repositories;
 
 public class CalendarRepository(DataContext context) : BaseRepository<CalendarEntity>(context)
 {
-    //private readonly DataContext _context = context;
+    private readonly DataContext _context = context;
 
 
     public override async Task<CalendarEntity> GetAsync(Expression<Func<CalendarEntity, bool>> expression)
     {
         try
         {
-            var existingEntity = await context.Calendars
+            var existingEntity = await _context.Calendars
                 .Include(i => i.Tasks)
                 .FirstOrDefaultAsync(expression);
 
@@ -35,7 +35,7 @@ public class CalendarRepository(DataContext context) : BaseRepository<CalendarEn
         try
         {
             //hitta entiteten
-            var existingEntities = await context.Calendars
+            var existingEntities = await _context.Calendars
                 .Include(i => i.Tasks)
                 .ToListAsync();
             //returnera om inte null
