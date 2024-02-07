@@ -35,11 +35,11 @@ public abstract class BaseRepository<TEntity> where TEntity : class
     {
         try
         {
-        var existingEntity = await _context.Set<TEntity>().FirstOrDefaultAsync(expression);
+            var existingEntity = await _context.Set<TEntity>().FirstOrDefaultAsync(expression);
        
             if (existingEntity != null)
             {
-            return existingEntity;
+                return existingEntity;
             }
 
         }

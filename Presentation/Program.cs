@@ -20,27 +20,32 @@ var builder = Host.CreateDefaultBuilder().ConfigureServices(services =>
     services.AddScoped<UserService>();
     services.AddScoped<CalendarRepository>();
     services.AddScoped<CalendarService>();
+    services.AddScoped<LocationRepository>();
+    services.AddScoped<LocationService>();
+
 
 }).Build();
 
 builder.Start();
 
-Console.ReadKey();
+
 Console.Clear();
 
-var userService = builder.Services.GetRequiredService<UserService>();
-var result = userService.CreateUserAsync(new UserDto
-        { 
-                UserName = "Helga",
-                Email = "helga@domain.com",
-                Password = "Testlösenord21321",
-        });
-
-if (result != null)
-    Console.WriteLine("lyckades");
-else
+//var userService = builder.Services.GetRequiredService<UserService>();
+var taskService = builder.Services.GetRequiredService<TaskService>();
+var result = await taskService.CreateTaskAsync(new TaskCreateDto
 {
+    Title = "Title 1",
+    Description = "Description 1",
+    Deadline = DateTime.,
+    Status = "Ongoing 1",
+    CategoryName = "Category 1",
+});
+
+if (result)
+
+    Console.WriteLine("Lyckades!");
+else
     Console.WriteLine("Något gick fel");
-}
 
 Console.ReadKey();

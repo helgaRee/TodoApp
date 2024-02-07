@@ -6,25 +6,29 @@ using System.Net.Http.Headers;
 
 namespace Infrastructure.Services;
 //Service som hanterar TASK, CALENDAR och LOCATION
-public class TaskService(UserRepository userRepository, LocationRepository locationRepository, CategoryRepository categoryRepository, TaskRepository taskRepository, CalendarRepository calendarRepository)
+public class TaskService
 {
-    //hämta min taskRepo
-    private readonly TaskRepository _taskRepository = taskRepository;
-    private readonly CategoryRepository _categoryRepository = categoryRepository;
-    //private readonly CategoryService _categoryService = categoryService;
-    //private readonly CalendarService _calendarService = calendarService;
+    private readonly LocationRepository _locationRepository;
+    private readonly CalendarRepository _calendarRepository;
+    private readonly UserRepository _userRepository;
+    private readonly CategoryRepository _categoryRepository;
+    private readonly TaskRepository _taskRepository;
 
-
-    private readonly LocationRepository _locationRepository = locationRepository;
-    private readonly CalendarRepository _calendarRepository = calendarRepository;
-    private readonly UserRepository _userRepository = userRepository;
-
+    public TaskService(LocationRepository locationRepository, CalendarRepository calendarRepository,
+        UserRepository userRepository, CategoryRepository categoryRepository, TaskRepository taskRepository)
+    {
+        _locationRepository = locationRepository;
+        _calendarRepository = calendarRepository;
+        _userRepository = userRepository;
+        _categoryRepository = categoryRepository;
+        _taskRepository = taskRepository;
+    }
     /// <summary>
     /// Creates a new Category if it doesnt already exist. Then creates a new Task.
     /// </summary>
     /// <param name="taskDto"></param>
     /// <returns>Returns a new TaskEntity with a category, or null if nothing was created.</returns>
-    public async Task<TaskDto> CreateTaskAsync(TaskCreateDto taskDto)
+    public async Task<bool> CreateTaskAsync(TaskCreateDto taskDto)
     {
         try
         {
@@ -34,6 +38,7 @@ public class TaskService(UserRepository userRepository, LocationRepository locat
 
             if (taskInDatabase == null)
             {
+
                 // Skapa Location
                 var locationEntity = await _locationRepository.CreateAsync(new LocationEntity
                 {
@@ -66,7 +71,14 @@ public class TaskService(UserRepository userRepository, LocationRepository locat
                     IsPrivate = taskDto.IsPrivate
                 });
 
-                // Skapa TaskEntity och associera med Location, Calendar, User och Category
+                // Kontrollera att alla nödvändiga entiteter skapades korrekt innan du skapar taskEntity
+                if (locationEntity == null || calendarEntity == null || userEntity == null || categoryEntity == null)
+                {
+                    Debug.WriteLine("En eller flera entiteter kunde inte skapas.");
+                    return false;
+                }
+
+                // Skapa taskEntity och associera med Location, Calendar, User och Category
                 var taskEntity = new TaskEntity
                 {
                     Title = taskDto.Title,
@@ -81,30 +93,20 @@ public class TaskService(UserRepository userRepository, LocationRepository locat
 
                 // Spara uppgiften i databasen
                 var createdTaskEntity = await _taskRepository.CreateAsync(taskEntity);
+              
 
-                // Skapa och returnera DTO för den skapade uppgiften
-                var createdTaskDto = new TaskDto
-                {
-                    Title = createdTaskEntity.Title,
-                    Description = createdTaskEntity.Description,
-                    Deadline = createdTaskEntity.Deadline.Value,
-                    Status = createdTaskEntity.Status,
-                    // Fyll i med resten av egenskaperna om det behövs
-                };
-
-                return createdTaskDto;
+                return true;
             }
             else
             {
                 // Om uppgiften redan finns i databasen, returnera null eller kasta ett undantag
-                return null!;
+                return false;
             }
         }
 
-
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
         // Skapa den nya uppgiften och använd den befintliga eller nyss skapade kategorins ID
-        return null!;
+        return false;
     }
 
 
