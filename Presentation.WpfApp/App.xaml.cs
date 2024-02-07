@@ -22,12 +22,15 @@ namespace Presentation.WpfApp
                 services.AddDbContext<DataContext>(x => x.UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\EC\SQL\TodoApp\Infrastructure\Data\local_database.mdf;Integrated Security=True;Connect Timeout=30"));
 
                 services.AddScoped<CategoryRepository>();
+                services.AddScoped<CategoryService>();
                 services.AddScoped<TaskRepository>();
-                services.AddScoped<UserRepository>();
                 services.AddScoped<TaskService>();
+                services.AddScoped<UserRepository>();
+                services.AddScoped<UserService>();
                 services.AddScoped<CalendarRepository>();
-                //Sinlgeton för att den ska vara konstant igång hela tiden
-                services.AddSingleton<MainWindow>();
+                services.AddScoped<CalendarService>();
+                services.AddScoped<LocationRepository>();
+                services.AddScoped<LocationService>();
             }).Build();
         }
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System;
+using Presentation;
 
 var builder = Host.CreateDefaultBuilder().ConfigureServices(services =>
 {
@@ -23,29 +24,14 @@ var builder = Host.CreateDefaultBuilder().ConfigureServices(services =>
     services.AddScoped<LocationRepository>();
     services.AddScoped<LocationService>();
 
+    services.AddSingleton<MenuService>();
+
 
 }).Build();
 
-builder.Start();
+var menuService = builder.Services.GetRequiredService<MenuService>();
+
+//menuService.CreateTask_UI();
+await menuService.GetTasks_UI();
 
 
-Console.Clear();
-
-//var userService = builder.Services.GetRequiredService<UserService>();
-var taskService = builder.Services.GetRequiredService<TaskService>();
-var result = await taskService.CreateTaskAsync(new TaskCreateDto
-{
-    Title = "Title 1",
-    Description = "Description 1",
-    Deadline = DateTime.,
-    Status = "Ongoing 1",
-    CategoryName = "Category 1",
-});
-
-if (result)
-
-    Console.WriteLine("Lyckades!");
-else
-    Console.WriteLine("Något gick fel");
-
-Console.ReadKey();

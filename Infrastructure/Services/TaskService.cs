@@ -116,7 +116,7 @@ public class TaskService
     /// </summary>
     /// <param name="title"></param>
     /// <returns>An existing task from the database, or null if the database is empty</returns>
-    public async Task<TaskEntity> GetTask(string title)
+    public async Task<TaskEntity> GetTaskAsync(string title)
     {
         try
         {
@@ -133,7 +133,7 @@ public class TaskService
     /// </summary>
     /// <param name=""></param>
     /// <returns>Returns a list of existing tasks or an empty list.</returns>
-    public async Task<IEnumerable<TaskEntity>> GetTasks()
+    public async Task<IEnumerable<TaskEntity>> GetTasksAsync()
     {
         //var tasks = new List<TaskCreateDto>();
         try
@@ -142,7 +142,7 @@ public class TaskService
             return tasks;         
         }
         catch (Exception ex) { Debug.WriteLine(ex.Message); }
-            return Enumerable.Empty<TaskEntity>();    
+        return Enumerable.Empty<TaskEntity>();
     }
 
 
@@ -152,7 +152,7 @@ public class TaskService
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    public async Task<bool> UpdateTask(TaskUpdateDto dto)
+    public async Task<bool> UpdateTaskAsync(TaskUpdateDto dto)
     {
 
         //SKAPA EN TASK - UPPDATERA EN TASK
@@ -171,7 +171,7 @@ public class TaskService
 
             //Asynkront anrop till metoden UpdateAsync.  Den tar 2 parametrar, ett lambdauttryck för att filtrera vilken kategori som ska uppdateras
             //baserat på CategoryId, samt den nya kategorin som ska uppdateras
-            var updatedTask = await _taskRepository.UpdateAsync(x => x.Title == dto.Title, taskEntity);
+            var updatedTask = await _taskRepository.UpdateAsync(x => x.TaskId == dto.TaskId, taskEntity);
 
             //OM task inte är null, skapa en ny TaskDto med de uppdaterade värdena. 
             if (updatedTask != null)
@@ -195,7 +195,7 @@ public class TaskService
   /// </summary>
   /// <param name="id"></param>
   /// <returns>Returns true if deletion was succesful, else false.</returns>
-    public async Task<bool> DeleteTask(int id)
+    public async Task<bool> DeleteTaskAsync(int id)
     {
         //hämta
         var deletedTask = await _taskRepository.DeleteAsync(x => x.TaskId == id);
@@ -203,7 +203,7 @@ public class TaskService
         
     }
 
-    public async Task<bool> IsComplete(int id)
+    public async Task<bool> IsCompleteAsync(int id)
     {
         //hämta
         var completedTask = await _taskRepository.GetAsync(x => x.TaskId == id);
